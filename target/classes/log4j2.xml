@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="Agent" packages="">
+    <Properties>
+        <Property name="baseDir">D:</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="${baseDir}\app.log"
+                     filePattern="${baseDir}/$${date:yyyy-MM}/app-%d{yyyy-MM-dd-HH}-%i.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%p] [%t] [%C] [%L row] %m%n"/>
+            <Policies>
+                <!-- 每天分割 -->
+                <TimeBasedTriggeringPolicy/>
+                <!-- 文件每100M分割 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <!-- 每天文件个数100个 -->
+            <DefaultRolloverStrategy max="100">
+                <!--
+                Nested conditions: the inner condition is only evaluated on files
+                for which the outer conditions are true.
+                -->
+                <Delete basePath="${baseDir}" maxDepth="3">
+                    <IfFileName glob="*/app-*.log.gz">
+                        <IfLastModified age="5d">
+                            <IfAny>
+                                <IfAccumulatedFileSize exceeds="10 GB"/>
+                                <IfAccumulatedFileCount exceeds="10"/>
+                            </IfAny>
+                        </IfLastModified>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <logger name="com.cds.learn.es" level="debug" additivity="false">
+            <appender-ref ref="RollingFile"/>
+        </logger>
+        <Root level="info">
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
