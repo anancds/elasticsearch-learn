@@ -55,27 +55,30 @@ import org.elasticsearch.index.query.QueryBuilders;
 		TransportAddress[] addrs = new TransportAddress[1];
 		addrs[0] = new InetSocketTransportAddress(InetAddress.getByName("10.65.214.213"), 9300);
 		ESClient = TransportClient.builder().settings(settings).build().addTransportAddresses(addrs);
+		System.out.println(getIndicesOfCluster());
 //				TransportClient client = new PreBuiltTransportClient(settings)
 //						.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("10.33.25.79"), 9200));
 
 
-		for (int i = 0; i< 100000; i++) {
-			String json = ESUtils.toJson(new LogModel());
-//		System.out.println(json);
-
-			IndexResponse response = ESClient.prepareIndex("abc", "abc")
-					//必须为对象单独指定ID
-					.setSource(json).execute().actionGet();
-			//多次index这个版本号会变
-//			System.out.println("response.version():" + response.getId());
-		}
+//		for (int i = 0; i< 100000; i++) {
+//			String json = ESUtils.toJson(new LogModel());
+////		System.out.println(json);
+//
+//			IndexResponse response = ESClient.prepareIndex("abc", "abc")
+//					//必须为对象单独指定ID
+//					.setSource(json).execute().actionGet();
+//			//多次index这个版本号会变
+////			System.out.println("response.version():" + response.getId());
+//		}
 		SearchResponse response1 = ESClient.prepareSearch("abc")
 				.setTypes("abc")
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 				.setQuery(QueryBuilders.termQuery("systemName", "oa"))
+				.setFrom(0)
+				.setSize(1000)
 				.execute()
 				.actionGet();
-		System.out.println(response1.getHits().getTotalHits());
+		System.out.println(response1.getHits().getAt(0).getSource());
 
 //		SearchResponse response2 = ESClient.prepareSearch().execute().actionGet();
 //		System.out.println(response2.getHits());
